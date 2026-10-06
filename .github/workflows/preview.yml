@@ -1,0 +1,51 @@
+name: Build and deploy preview
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build preview
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import os,re
+          repo=os.environ['GITHUB_REPOSITORY'].split('/')[-1]
+          p='astro.config.mjs'
+          if os.path.isfile(p):
+              s=open(p).read()
+              s=re.sub(r"site: '[^']+'", "site: 'https://aintgottaclue.github.io'",s)
+              s=s.replace("site: 'https://aintgottaclue.github.io',", "site: 'https://aintgottaclue.github.io',\n  base: '/"+repo+"/',")
+              open(p,'w').write(s)
+          PY
+          if [ -f package.json ]; then npm install --ignore-scripts && npm run build; else mkdir -p dist; find . -mindepth 1 -maxdepth 1 ! -name .git ! -name .github ! -name dist ! -name '*.zip' -exec cp -a {} dist/ \;; fi
+          python3 - <<'PY'
+          import os,re
+          from pathlib import Path
+          base='/'+os.environ['GITHUB_REPOSITORY'].split('/')[-1]+'/'
+          for p in Path('dist').rglob('*.html'):
+              s=p.read_text()
+              s=re.sub(r'(?<=href=")/(?!/|'+re.escape(base[1:])+r')',base,s)
+              s=re.sub(r'(?<=src=")/(?!/|'+re.escape(base[1:])+r')',base,s)
+              p.write_text(s)
+          Path('dist/.nojekyll').touch()
+          PY
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - id: deployment
+        uses: actions/deploy-pages@v4

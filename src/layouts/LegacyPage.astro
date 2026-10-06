@@ -1,0 +1,12 @@
+---
+import { city, resolvePage } from '../data/city';
+const { slug } = Astro.props;
+const original = city.pages[slug as keyof typeof city.pages];
+if (!original) throw new Error(`Unknown page ${slug}`);
+// Page markup is preserved from the data file, including copy, SEO metadata,
+// schema, tracker order, form fields, nav structure and all CSS classes. Only
+// per-site values ({{BRAND}}, {{ORIGIN}}, phone, GA4, tracker) resolve from the
+// same city file's site block during Astro's static build.
+const html = resolvePage(original);
+---
+<Fragment set:html={html} />

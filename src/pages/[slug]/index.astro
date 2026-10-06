@@ -1,0 +1,9 @@
+---
+import LegacyPage from '../../layouts/LegacyPage.astro';
+import { city } from '../../data/city';
+export function getStaticPaths() {
+  return Object.keys(city.pages).filter(slug => slug !== '/').map(slug => ({ params: { slug } }));
+}
+const { slug } = Astro.params;
+---
+<LegacyPage slug={slug} />
