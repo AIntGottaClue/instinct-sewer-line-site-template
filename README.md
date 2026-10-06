@@ -49,6 +49,15 @@ placeholder data file so every token is visible.
 - Inline authority links in body copy where a source backs the claim.
 - Never describe what the site is for (no "lead generation" phrasing).
 
+## Hero form (every page)
+
+Every page carries exactly one request form, in the hero, using the same
+lp-hero layout as the landing pages. The build-time transform in
+src/data/city.ts (applyHeroForm) moves the form out of the old bottom contact
+section into the hero and removes that section; privacy and terms get a hero
+built from their h1 + meta description with the home form re-labelled. The
+/lp/ hub page stays a formless variant index by design.
+
 ## Landing pages (/lp/)
 
 Variants come from the data file's `lpVariants`. /lp/ pages are noindex. Their

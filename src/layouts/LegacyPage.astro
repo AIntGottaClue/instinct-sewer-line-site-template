@@ -1,5 +1,5 @@
 ---
-import { city, resolvePage } from '../data/city';
+import { city, resolvePage, applyHeroForm } from '../data/city';
 const { slug } = Astro.props;
 const original = city.pages[slug as keyof typeof city.pages];
 if (!original) throw new Error(`Unknown page ${slug}`);
@@ -7,6 +7,10 @@ if (!original) throw new Error(`Unknown page ${slug}`);
 // schema, tracker order, form fields, nav structure and all CSS classes. Only
 // per-site values ({{BRAND}}, {{ORIGIN}}, phone, GA4, tracker) resolve from the
 // same city file's site block during Astro's static build.
-const html = resolvePage(original);
+// Every page then gets the request form in the hero and loses the bottom
+// contact section, so each page carries exactly one form.
+const location = slug === 'privacy' ? 'Privacy policy' : slug === 'terms' ? 'Terms of service' : undefined;
+const resolved = resolvePage(original);
+const html = location ? applyHeroForm(resolved, location) : applyHeroForm(resolved, '');
 ---
 <Fragment set:html={html} />
