@@ -126,3 +126,14 @@ window.fetch = function(url,options) {
   } catch(err) { /* Leave the tracker undisturbed. */ }
   return pending;
 };
+
+/* Call-button tap tracking: sends a GA4 event for every tel: link tap. */
+document.addEventListener('click', function (e) {
+  var a = e.target && e.target.closest ? e.target.closest('a[href^="tel:"]') : null;
+  if (!a || typeof window.gtag !== 'function') return;
+  window.gtag('event', 'phone_call_tap', {
+    page_path: location.pathname,
+    link_url: a.getAttribute('href'),
+    link_text: (a.textContent || '').trim().slice(0, 60)
+  });
+}, true);
